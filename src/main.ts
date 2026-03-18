@@ -86,7 +86,7 @@ function renderArcade() {
             <h3 style="color: #00ffff; margin-top: 0; text-align: center; font-size: 0.8rem; text-shadow: 0 0 5px #00ffff;">TOP PILOTS</h3>
             <div id="scores-list" style="font-size: 0.6rem; line-height: 1.8;"></div>
         </div>
-        <button id="logout-btn" class="retro-font" style="position: absolute; bottom: 20px; left: 20px; z-index: 500; background: rgba(0,0,0,0.5); border: 1px solid #ff00ff; color: #ff00ff; padding: 10px; cursor: pointer; text-transform: uppercase; font-size: 0.6rem; box-shadow: 0 0 10px rgba(255,0,255,0.3);">EJECT</button>
+        <button id="logout-btn" class="retro-font">EJECT</button>
     `;
 
     const gameContainer = document.getElementById('game-container')!;

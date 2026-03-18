@@ -387,21 +387,46 @@ export class Game {
     private initEvents() {
         const move = (cx: number, cy: number) => {
             if (this.isGameOver || !this.ship) return;
-            const x = (cx / window.innerWidth) * 2 - 1; const y = -((cy / window.innerHeight) * 2 - 1);
+            const x = (cx / window.innerWidth) * 2 - 1; 
+            const y = -((cy / window.innerHeight) * 2 - 1);
+
+            const aspect = window.innerWidth / window.innerHeight;
+            const horizontalRange = aspect > 1 ? 14 : 7; // More narrow for portrait
 
             // Update targets for smooth lerping in the update loop
-            this.targetShipX = x * 14; 
+            this.targetShipX = x * horizontalRange; 
             this.targetShipY = (y + 1) * 5 + 1;
 
             this.targetShipRotZ = -x * 1.0;
             this.targetShipRotX = this.BASE_PITCH + 0.3; // Lock pitch to look good and prevent forward tilt
-        };        window.addEventListener('mousemove', (e) => move(e.clientX, e.clientY));
-        window.addEventListener('mousedown', () => {
+        };        
+        window.addEventListener('mousemove', (e) => move(e.clientX, e.clientY));
+        
+        // Touch move
+        window.addEventListener('touchmove', (e) => {
+            if (e.touches.length > 0) {
+                move(e.touches[0].clientX, e.touches[0].clientY);
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        const shoot = () => {
             if (this.isGameOver || !this.ship) return;
             this.audio.playLaser();
             const b = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 2), new THREE.MeshBasicMaterial({ color: 0x00ffff }));
             b.position.copy(this.ship.position); this.scene.add(b); this.bullets.push(b);
-        });
+        };
+
+        window.addEventListener('mousedown', shoot);
+        window.addEventListener('touchstart', (e) => {
+            // Only shoot on initial touch if it's not a move
+            if (e.touches.length === 1) {
+                shoot();
+                // Initialize movement on first touch
+                move(e.touches[0].clientX, e.touches[0].clientY);
+                e.preventDefault();
+            }
+        }, { passive: false });
     }
 
     private update() {

@@ -45,6 +45,13 @@ body {
   text-shadow: 0 0 10px $neon-cyan, 0 0 20px $neon-purple;
   letter-spacing: 8px;
   animation: flicker 2s infinite;
+  text-align: center;
+
+  @media (max-width: 600px) {
+    font-size: 1.8rem;
+    letter-spacing: 4px;
+    padding: 0 10px;
+  }
 }
 
 .loading-bar {
@@ -193,6 +200,17 @@ body {
   z-index: 500;
   pointer-events: none;
   text-align: center;
+  width: 100%;
+
+  @media (max-width: 600px) {
+    top: 10px;
+    #game-score {
+      font-size: 1.2rem;
+    }
+    #shield-container {
+      width: 180px !important;
+    }
+  }
 }
 
 .leaderboard-overlay {
@@ -206,6 +224,16 @@ body {
   padding: 15px;
   width: 180px;
   box-shadow: 0 0 15px rgba($neon-cyan, 0.2);
+
+  @media (max-width: 600px) {
+    top: auto;
+    bottom: 80px;
+    right: 10px;
+    width: 140px;
+    padding: 10px;
+    font-size: 0.8rem;
+    background: rgba($arcade-black, 0.9);
+  }
 }
 
 .game-canvas {
@@ -244,6 +272,10 @@ body {
   text-align: center;
   width: 90%;
   max-width: 400px;
+
+  @media (max-width: 600px) {
+    padding: 20px 15px;
+  }
 }
 
 .neon-btn-custom {
@@ -294,34 +326,23 @@ body {
   }
 }
 
-.auth-panel {
-  background: rgba($arcade-black, 0.9);
-  border: 1px solid $neon-cyan;
-  padding: 20px;
-  border-radius: 4px;
-  box-shadow: 0 0 15px rgba($neon-cyan, 0.3);
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  width: 300px;
-  
-  input {
-    background: transparent;
-    border: 1px solid $neon-purple;
-    color: #fff;
-    padding: 10px;
-    font-family: inherit;
-    &:focus { outline: none; border-color: $neon-cyan; }
-  }
+#logout-btn {
+  position: absolute; 
+  bottom: 20px; 
+  left: 20px; 
+  z-index: 500; 
+  background: rgba(0,0,0,0.5); 
+  border: 1px solid #ff00ff; 
+  color: #ff00ff; 
+  padding: 10px; 
+  cursor: pointer; 
+  text-transform: uppercase; 
+  font-size: 0.6rem; 
+  box-shadow: 0 0 10px rgba(255,0,255,0.3);
 
-  button {
-    background: transparent;
-    border: 1px solid $neon-pink;
-    color: $neon-pink;
-    padding: 10px;
-    cursor: pointer;
-    font-family: inherit;
-    text-transform: uppercase;
-    &:hover { background: $neon-pink; color: #fff; box-shadow: 0 0 15px $neon-pink; }
+  @media (max-width: 600px) {
+    bottom: 10px;
+    left: 10px;
+    padding: 8px;
   }
 }
