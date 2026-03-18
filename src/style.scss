@@ -1,0 +1,327 @@
+$neon-pink: #ff00ff;
+$neon-cyan: #00ffff;
+$neon-purple: #9d00ff;
+$bg-color: #0d0221;
+$arcade-black: #050110;
+
+body {
+  margin: 0;
+  background-color: $bg-color;
+  color: #fff;
+  font-family: 'Share Tech Mono', monospace;
+  overflow: hidden;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.retro-font {
+  font-family: 'Press Start 2P', cursive;
+}
+
+#splash-screen {
+  position: fixed;
+  inset: 0;
+  background: $arcade-black;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  transition: opacity 0.8s ease;
+
+  &.fade-out {
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+.neon-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 3rem;
+  font-weight: 900;
+  color: $neon-cyan;
+  text-shadow: 0 0 10px $neon-cyan, 0 0 20px $neon-purple;
+  letter-spacing: 8px;
+  animation: flicker 2s infinite;
+}
+
+.loading-bar {
+  width: 200px;
+  height: 2px;
+  background: rgba($neon-purple, 0.2);
+  margin-top: 20px;
+  overflow: hidden;
+  .progress {
+    width: 100%;
+    height: 100%;
+    background: $neon-pink;
+    box-shadow: 0 0 10px $neon-pink;
+    animation: loading 1.5s infinite ease-in-out;
+  }
+}
+
+.status {
+  margin-top: 10px;
+  font-size: 0.7rem;
+  color: $neon-purple;
+}
+
+@keyframes flicker {
+  0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
+  20%, 22%, 24%, 55% { opacity: 0.4; }
+}
+
+@keyframes loading {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100%); }
+}
+
+#app {
+  width: 100vw;
+  height: 100vh;
+  display: block;
+  position: relative;
+  overflow: hidden;
+  animation: crt-flicker 0.15s infinite;
+
+  // Enhanced CRT/VHS Overlay
+  &::before {
+    content: " ";
+    display: block;
+    position: absolute;
+    top: 0; left: 0; bottom: 0; right: 0;
+    z-index: 999;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    background-size: 100% 4px, 3px 100%;
+    pointer-events: none;
+    opacity: 0.6;
+    animation: scanlines 10s linear infinite;
+  }
+  
+  // VHS Tracking and chromatic aberration
+  &::after {
+    content: " ";
+    display: block;
+    position: absolute;
+    top: 0; left: 0; bottom: 0; right: 0;
+    z-index: 1000;
+    pointer-events: none;
+    box-shadow: inset 0 0 100px rgba(0,0,0,0.9);
+    background: radial-gradient(circle, transparent 50%, rgba(0,0,0,0.6) 120%);
+    animation: vhs-glitch 5s infinite;
+  }
+}
+
+// Add an extra layer specifically for heavy VHS tracking distortion
+.game-container-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  animation: vhs-jitter 3s infinite;
+
+  &::before {
+    content: " ";
+    display: block;
+    position: absolute;
+    top: 0; left: 0; bottom: 0; right: 0;
+    background: radial-gradient(circle, transparent 40%, rgba(0,0,0,0.4) 100%);
+    z-index: 101;
+    pointer-events: none;
+  }
+  
+  // Thick rolling tracking bar
+  &::after {
+    content: "";
+    position: absolute;
+    top: -100%;
+    left: 0;
+    right: 0;
+    height: 15vh;
+    background: rgba(255, 255, 255, 0.03);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
+    z-index: 102;
+    pointer-events: none;
+    animation: tracking-bar 8s linear infinite;
+  }
+}
+
+@keyframes tracking-bar {
+  0% { top: -100%; }
+  100% { top: 200%; }
+}
+
+@keyframes vhs-jitter {
+  0% { transform: translateX(0); }
+  5% { transform: translateX(1px); }
+  10% { transform: translateX(-1px); }
+  15% { transform: translateX(0); }
+  45% { transform: translateX(0); }
+  46% { transform: translateX(-2px) skewX(0.5deg); filter: blur(1px); }
+  48% { transform: translateX(2px) skewX(-0.5deg); filter: blur(0px); }
+  50% { transform: translateX(0); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes scanlines {
+  from { background-position: 0 0, 0 0; }
+  to { background-position: 0 400px, 0 0; }
+}
+
+@keyframes vhs-glitch {
+  0% { transform: translate(0) scale(1); opacity: 1; }
+  2% { transform: translate(-2px, 1px) scale(1.01); opacity: 0.8; }
+  4% { transform: translate(2px, -1px) scale(1); opacity: 1; filter: hue-rotate(10deg) saturate(1.5); }
+  6% { transform: translate(0) scale(1); opacity: 1; filter: none; }
+  45% { transform: translate(0); }
+  46% { transform: translate(1px, 2px); filter: contrast(1.2) brightness(1.2); }
+  48% { transform: translate(-1px, -2px); }
+  50% { transform: translate(0); filter: none; }
+  100% { transform: translate(0); }
+}
+
+#game-ui {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 500;
+  pointer-events: none;
+  text-align: center;
+}
+
+.leaderboard-overlay {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 500;
+  background: rgba($arcade-black, 0.6);
+  backdrop-filter: blur(5px);
+  border: 1px solid $neon-cyan;
+  padding: 15px;
+  width: 180px;
+  box-shadow: 0 0 15px rgba($neon-cyan, 0.2);
+}
+
+.game-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  background: #000;
+  cursor: crosshair;
+}
+
+@keyframes crt-flicker {
+  0% { opacity: 0.99; }
+  5% { opacity: 0.95; }
+  10% { opacity: 0.99; }
+  100% { opacity: 1; }
+}
+
+/* Custom Modals */
+.modal-overlay-custom {
+  position: fixed;
+  inset: 0;
+  background: rgba(13, 2, 33, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+.modal-content-custom {
+  background: $arcade-black;
+  border: 2px solid $neon-pink;
+  box-shadow: 0 0 30px rgba($neon-pink, 0.4);
+  padding: 30px;
+  border-radius: 4px;
+  text-align: center;
+  width: 90%;
+  max-width: 400px;
+}
+
+.neon-btn-custom {
+  background: transparent;
+  border: 1px solid $neon-cyan;
+  color: $neon-cyan;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-family: inherit;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  transition: all 0.2s;
+  box-shadow: 0 0 10px rgba($neon-cyan, 0.2);
+
+  &:hover {
+    background: $neon-cyan;
+    color: #000;
+    box-shadow: 0 0 20px $neon-cyan;
+  }
+
+  &.abort {
+    border-color: $neon-purple;
+    color: $neon-purple;
+    &:hover {
+      background: $neon-purple;
+      color: #fff;
+      box-shadow: 0 0 20px $neon-purple;
+    }
+  }
+}
+
+.neon-input-custom {
+  background: rgba($neon-purple, 0.1);
+  border: 1px solid $neon-cyan;
+  color: #fff;
+  padding: 12px;
+  font-family: inherit;
+  width: 80%;
+  text-align: center;
+  font-size: 1.2rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 15px $neon-cyan;
+    background: rgba($neon-cyan, 0.1);
+  }
+}
+
+.auth-panel {
+  background: rgba($arcade-black, 0.9);
+  border: 1px solid $neon-cyan;
+  padding: 20px;
+  border-radius: 4px;
+  box-shadow: 0 0 15px rgba($neon-cyan, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 300px;
+  
+  input {
+    background: transparent;
+    border: 1px solid $neon-purple;
+    color: #fff;
+    padding: 10px;
+    font-family: inherit;
+    &:focus { outline: none; border-color: $neon-cyan; }
+  }
+
+  button {
+    background: transparent;
+    border: 1px solid $neon-pink;
+    color: $neon-pink;
+    padding: 10px;
+    cursor: pointer;
+    font-family: inherit;
+    text-transform: uppercase;
+    &:hover { background: $neon-pink; color: #fff; box-shadow: 0 0 15px $neon-pink; }
+  }
+}
