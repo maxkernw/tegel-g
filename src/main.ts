@@ -11,25 +11,24 @@ function hideSplashScreen() {
     const splash = document.getElementById('splash-screen');
     if (splash) {
         splash.classList.add('fade-out');
-        setTimeout(() => splash.remove(), 800);
+        setTimeout(() => splash.remove(), 1500);
     }
 }
 
-// Simple config check
 if (!import.meta.env.VITE_FIREBASE_API_KEY) {
-    console.error("FIREBASE API KEY MISSING! Check your .env file.");
+    console.warn("FIREBASE API KEY MISSING! Check your .env file.");
 }
 
 export function showCustomConfirm(title: string, message: string, onConfirm: () => void) {
     const modal = document.createElement('div');
     modal.className = 'modal-overlay-custom';
     modal.innerHTML = `
-        <div class="modal-content-custom retro-font">
-            <h2 style="color: #ff00ff; text-shadow: 0 0 10px #ff00ff; margin-top: 0; font-size: 1.2rem; line-height: 1.5;">${title}</h2>
-            <p style="color: #00ffff; margin-bottom: 20px; font-size: 0.8rem; line-height: 1.5;">${message}</p>
+        <div class="modal-content-custom">
+            <h2 class="retro-font" style="color: #7ce8ff; margin-top: 0; font-size: 1.1rem; line-height: 1.5; font-weight: 400;">${title}</h2>
+            <p style="color: rgba(235, 248, 255, 0.8); margin-bottom: 24px; font-size: 0.95rem; line-height: 1.5; letter-spacing: 0.08em;">${message}</p>
             <div style="display: flex; gap: 15px; justify-content: center;">
-                <button id="modal-yes" class="neon-btn-custom retro-font" style="font-size: 0.7rem;">CONFIRM</button>
-                <button id="modal-no" class="neon-btn-custom abort retro-font" style="font-size: 0.7rem;">ABORT</button>
+                <button id="modal-yes" class="neon-btn-custom">CONFIRM</button>
+                <button id="modal-no" class="neon-btn-custom abort">RESUME FLIGHT</button>
             </div>
         </div>
     `;
@@ -46,12 +45,13 @@ export function showCustomPrompt(title: string, message: string, defaultValue: s
     const modal = document.createElement('div');
     modal.className = 'modal-overlay-custom';
     modal.innerHTML = `
-        <div class="modal-content-custom retro-font">
-            <h2 style="color: #ff00ff; text-shadow: 0 0 10px #ff00ff; margin-top: 0; font-size: 1.2rem; line-height: 1.5;">${title}</h2>
-            <p style="color: #00ffff; margin-bottom: 15px; font-size: 0.8rem; line-height: 1.5;">${message}</p>
-            <input type="text" id="modal-input" value="${defaultValue}" class="neon-input-custom retro-font" maxlength="10" style="font-size: 1rem;" />
-            <div style="margin-top: 25px;">
-                <button id="modal-submit" class="neon-btn-custom retro-font" style="font-size: 0.7rem;">SUBMIT DATA</button>
+        <div class="modal-content-custom">
+            <h2 class="retro-font" style="color: #7ce8ff; margin-top: 0; font-size: 1.1rem; line-height: 1.5; font-weight: 400;">${title}</h2>
+            <p style="color: rgba(235, 248, 255, 0.8); margin-bottom: 18px; font-size: 0.9rem; line-height: 1.5; letter-spacing: 0.1em;">${message}</p>
+            <input type="text" id="modal-input" value="${defaultValue}" class="neon-input-custom" maxlength="12" />
+            <div style="margin-top: 24px; display: flex; gap: 12px; justify-content: center;">
+                <button id="modal-submit" class="neon-btn-custom">TRANSMIT TO ATLAS</button>
+                <button id="modal-cancel" class="neon-btn-custom abort">CONTINUE</button>
             </div>
         </div>
     `;
@@ -67,6 +67,7 @@ export function showCustomPrompt(title: string, message: string, defaultValue: s
     };
 
     document.getElementById('modal-submit')?.addEventListener('click', handleSubmit);
+    document.getElementById('modal-cancel')?.addEventListener('click', () => modal.remove());
     input.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') handleSubmit();
     });
@@ -82,44 +83,61 @@ function renderArcade() {
     
     appDiv.innerHTML = `
         <div id="game-container"></div>
-        <div class="leaderboard-overlay retro-font">
-            <h3 style="color: #00ffff; margin-top: 0; text-align: center; font-size: 0.8rem; text-shadow: 0 0 5px #00ffff;">TOP PILOTS</h3>
-            <div id="scores-list" style="font-size: 0.6rem; line-height: 1.8;"></div>
+        <div class="leaderboard-overlay">
+            <h3 class="retro-font">ATLAS REGISTRY</h3>
+            <div id="scores-list" style="font-size: 0.85rem; line-height: 1.9; letter-spacing: 0.08em;"></div>
         </div>
-        <button id="logout-btn" class="retro-font">EJECT</button>
+        <button id="logout-btn">❖ UPLOAD DISCOVERIES</button>
     `;
 
-    const gameContainer = document.getElementById('game-container')!;
-    currentGame = new Game(gameContainer, async (finalScore) => {
-        showCustomPrompt("MISSION COMPLETE", "ENTER PILOT IDENTIFIER", "GUEST", async (username) => {
-            const finalUsername = (username || "GUEST").substring(0, 10).toUpperCase();
-            await submitScore({
-                username: finalUsername,
-                score: finalScore,
-                timestamp: Date.now()
-            });
-            // Restart game without page reload
-            renderArcade();
+    const handleUploadScore = (finalScore: number) => {
+        showCustomPrompt("ATLAS DISCOVERY LOG", `TRANSMIT ${finalScore.toLocaleString()} DISCOVERY UNITS TO REGISTRY`, "TRAVELLER", async (username) => {
+            const finalUsername = (username || "TRAVELLER").substring(0, 12).toUpperCase();
+            try {
+                await submitScore({
+                    username: finalUsername,
+                    score: finalScore,
+                    timestamp: Date.now()
+                });
+            } catch (e) {
+                console.warn("Could not upload score to Firebase:", e);
+            }
         });
+    };
+
+    const gameContainer = document.getElementById('game-container')!;
+    currentGame = new Game(gameContainer, (finalScore) => {
+        handleUploadScore(finalScore);
+    });
+
+    document.getElementById('logout-btn')?.addEventListener('click', () => {
+        if (currentGame) {
+            handleUploadScore(currentGame.getScore());
+        }
     });
 
     subscribeToLeaderboard((scores) => {
-        const list = document.getElementById('scores-list')!;
+        const list = document.getElementById('scores-list');
+        if (!list) return;
         list.innerHTML = scores.map(s => `
-            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                <span>${s.username}</span>
-                <span style="color: #ff00ff;">${s.score}</span>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                <span style="color: rgba(255,255,255,0.85);">${s.username}</span>
+                <span style="color: #ffbe6b; font-weight: 600;">${s.score.toLocaleString()}</span>
             </div>
         `).join('');
+
+        if (currentGame && scores.length > 0) {
+            const uniquePilots = Array.from(new Set(scores.map(s => s.username).filter(Boolean)));
+            currentGame.setLeaderboardPilots(uniquePilots);
+        }
     });
 }
 
-// Start immediately (No Auth)
 try {
     renderArcade();
 } catch (err) {
-    console.error("Failed to render arcade:", err);
-    appDiv.innerHTML = `<div style="color: red; padding: 20px;">SYSTEM ERROR: UNABLE TO LOAD ARCADE CORE. CHECK CONSOLE.</div>`;
+    console.error("Failed to render expedition:", err);
+    appDiv.innerHTML = `<div style="color: #ff7e6b; padding: 20px;">ATLAS TELEMETRY ERROR: CHECK CONSOLE.</div>`;
 } finally {
     setTimeout(hideSplashScreen, 1500);
 }
